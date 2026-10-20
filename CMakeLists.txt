@@ -15,7 +15,11 @@ find_package(Qt6 COMPONENTS
         OpenGLWidgets
         REQUIRED)
 
-add_executable(3D_fluid_sim src/main.cpp)
+add_executable(3D_fluid_sim src/main.cpp
+        include/Vec3.h)
+target_include_directories(3D_fluid_sim PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 target_link_libraries(3D_fluid_sim PRIVATE
         Qt6::Core
         Qt6::Gui

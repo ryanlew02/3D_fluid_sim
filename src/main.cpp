@@ -1,7 +1,8 @@
 #include <QApplication>
 #include <QPushButton>
 
-//testting
+// ************ MAIN FUNCTION ************ //
+
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
     QPushButton button("Hello world!", nullptr);
@@ -9,4 +10,3 @@ int main(int argc, char *argv[]) {
     button.show();
     return QApplication::exec();
 }
-//sadfnioasgniogaigwngoisa
