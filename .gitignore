@@ -1,0 +1,39 @@
+
+# =========================
+# CLion / JetBrains
+# =========================
+.idea/
+*.iml
+
+# =========================
+# CMake
+# =========================
+cmake-build-*/
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+compile_commands.json
+Makefile
+
+# =========================
+# Compiled files
+# =========================
+*.exe
+*.dll
+*.obj
+*.o
+*.a
+*.lib
+*.pdb
+*.ilk
+
+# =========================
+# Logs and temporary files
+# =========================
+*.log
+*.tmp
+*.bak
+*~
+.DS_Store
+Thumbs.db
