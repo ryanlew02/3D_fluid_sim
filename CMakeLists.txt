@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 4.3)
-project(3D_fluid_sim)
+project(3D_fluid_sim LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -32,6 +32,15 @@ FetchContent_MakeAvailable(imgui)
 # OpenGL
 find_package(OpenGL REQUIRED)
 
+# GLAD 2
+add_library(glad STATIC
+        external/glad/src/gl.c
+)
+
+target_include_directories(glad PUBLIC
+        ${CMAKE_CURRENT_SOURCE_DIR}/external/glad/include
+)
+
 # ImGui Library
 add_library(imgui_lib STATIC
         ${imgui_SOURCE_DIR}/imgui.cpp
@@ -55,6 +64,10 @@ target_link_libraries(imgui_lib PUBLIC
 # Application
 add_executable(3D_fluid_sim
         src/main.cpp
+        src/Window.cpp
+        src/App.cpp
+        include/Window.h
+        include/App.h
         include/Vec3.h
 )
 
@@ -64,4 +77,5 @@ target_include_directories(3D_fluid_sim PRIVATE
 
 target_link_libraries(3D_fluid_sim PRIVATE
         imgui_lib
+        glad
 )
