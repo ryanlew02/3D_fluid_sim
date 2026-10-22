@@ -5,9 +5,6 @@
 
 class Window {
 
-private:
-    GLFWwindow* window = nullptr;
-
 public:
     Window(int width, int height, const char* title);
     ~Window();
@@ -20,5 +17,8 @@ public:
     void swapBuffers() const;
     GLFWwindow* getWindow() const;
     void setTitle(const std::string& title) const;
+
+private:
+    GLFWwindow* window = nullptr;
 
 };

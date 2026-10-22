@@ -12,9 +12,9 @@ void App::run() {
 
     while (!window.shouldClose()) {
 
-
-
-
+        //swap buffers and check for event updates
+        window.swapBuffers();
+        window.pollEvents();
     }
 
 }
