@@ -15,7 +15,8 @@ public:
     Renderer& operator=(const Renderer&) = delete;
 
     void drawSphere();
-    static std::vector<float> createSphere(const float centerX, const float centerY, const float centerZ, const float radius);
+    static std::vector<float> CreateSphere(const float radius = 1.0f, const int stacks = 20, const int sectors = 30);
+    void setupMeshBuffers(GLuint& VAO, GLuint& VBO, const std::vector<float>& vertices, size_t vertexCount) const;
 
     void initialize();
     void clear() const;
@@ -32,9 +33,6 @@ private:
     GLint projectionLocation = -1;
 
     int vertexCount = 0;
-
-    void setupBuffers();
-    void setupShaders();
 
     static GLuint createProgram(const char* vertexSource, const char* fragmentSource);
     static std::pair<const char*, const char*> getShaderSources();

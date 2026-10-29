@@ -4,6 +4,9 @@
 
 #include <iostream>
 #include <ostream>
+#include <cmath>
+#include <numbers>
+#include <vector>
 
 
 Renderer::Renderer() {
@@ -26,24 +29,24 @@ Renderer::Renderer() {
     //tell OpenGL which shader program we want to use
     glUseProgram(shaderProgram);
 
-    const std::vector<float> vertices = CreateCircle();
+    const std::vector<float> vertices = CreateSphere();
 
-    vertexCount = vertices.size() / 2;
+    vertexCount = vertices.size() / 3;
 
-
-    Renderer::initVAOVBO(VAO, VBO, vertices.data(), vertexCount);
+    Renderer::setupMeshBuffers(VAO, VBO, vertices.data(), vertexCount);
 
 
 }
 
+Renderer::~Renderer() {
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteProgram(shaderProgram);
+}
 
-
-
-
-
-
-
-
+void Renderer::clear() const {
+    glClear(GL_COLOR_BUFFER_BIT);
+}
 
 
 GLuint Renderer::createProgram(const char* vertexSource, const char* fragmentSource) {
@@ -103,6 +106,70 @@ GLuint Renderer::createProgram(const char* vertexSource, const char* fragmentSou
     glDeleteShader(fragmentShader);
 
     return shaderProgram;
+}
+
+void Renderer::setupMeshBuffers(GLuint& VAO, GLuint& VBO, const std::vector<float>& vertices, size_t vertexCount) const {
+
+    //generate the vao and vbo with 1 object each
+    glGenVertexArrays(1, &VAO);
+    glGenBuffers(1, &VBO);
+
+    //make the VAO the current vertex array by binding it
+    glBindVertexArray(VAO);
+
+    //bind the VBO specifying array_buffer
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    //introduce the vertices into the VBO
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+    //configure the vertex attribute so OpenGL knows how to read the VBO
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
+    //enable the vertex attribute so OpenGL knows how to use it
+    glEnableVertexAttribArray(0);
+
+    //bind both the VBO and VAO to 0 so we don't accidentally modify them
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
+}
+
+std::vector<float> Renderer::CreateSphere(float radius, int stacks, int sectors) {
+    std::vector<float> vertices;
+
+    constexpr float PI = std::numbers::pi_v<float>;
+
+    for (int i = 0; i < stacks; i++) {
+        const float theta1 = PI * i / stacks;
+        const float theta2 = PI * (i + 1) / stacks;
+
+        for (int j = 0; j < sectors; j++) {
+            const float phi1 = 2.0f * PI * j / sectors;
+            const float phi2 = 2.0f * PI * (j + 1) / sectors;
+
+            auto point = [&](const float theta, const float phi) {
+                const float x = radius * sin(theta) * cos(phi);
+                const float y = radius * sin(theta) * sin(phi);
+                const float z = radius * sin (theta) * sin(theta);
+
+                return std::vector<float>{x, y, z};
+            };
+
+            auto a = point(theta1, phi1);
+            auto b = point(theta2, phi1);
+            auto c = point(theta2, phi2);
+            auto d = point(theta1, phi2);
+
+            //first triangle
+            vertices.insert(vertices.end(), a.begin(), a.end());
+            vertices.insert(vertices.end(), b.begin(), b.end());
+            vertices.insert(vertices.end(), c.begin(), c.end());
+
+            //second triangle
+            vertices.insert(vertices.end(), a.begin(), a.end());
+            vertices.insert(vertices.end(), c.begin(), c.end());
+            vertices.insert(vertices.end(), d.begin(), d.end());
+        }
+    }
+    return vertices;
 }
 
 std::pair<const char*, const char*> Renderer::getShaderSources() {
