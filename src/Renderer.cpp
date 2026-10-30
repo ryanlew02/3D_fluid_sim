@@ -148,7 +148,7 @@ std::vector<float> Renderer::CreateSphere(float radius, int stacks, int sectors)
             auto point = [&](const float theta, const float phi) {
                 const float x = radius * sin(theta) * cos(phi);
                 const float y = radius * sin(theta) * sin(phi);
-                const float z = radius * sin (theta) * sin(theta);
+                const float z = radius * cos(theta);
 
                 return std::vector<float>{x, y, z};
             };
