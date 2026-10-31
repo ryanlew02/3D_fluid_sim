@@ -27,7 +27,17 @@ FetchContent_Declare(
         GIT_TAG master
 )
 
+# GLM
+FetchContent_Declare(
+        glm
+        GIT_REPOSITORY https://github.com/g-truc/glm.git
+        GIT_TAG 1.0.1
+)
+
+FetchContent_MakeAvailable(glm)
+
 FetchContent_MakeAvailable(imgui)
+
 
 # OpenGL
 find_package(OpenGL REQUIRED)
@@ -80,4 +90,5 @@ target_include_directories(3D_fluid_sim PRIVATE
 target_link_libraries(3D_fluid_sim PRIVATE
         imgui_lib
         glad
+        glm::glm
 )

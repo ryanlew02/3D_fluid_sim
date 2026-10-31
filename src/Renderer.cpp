@@ -7,6 +7,9 @@
 #include <cmath>
 #include <numbers>
 #include <vector>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 
 Renderer::Renderer() {
@@ -29,13 +32,11 @@ Renderer::Renderer() {
     //tell OpenGL which shader program we want to use
     glUseProgram(shaderProgram);
 
-    const std::vector<float> vertices = CreateSphere();
+    const std::vector<float> vertices = createSphere();
 
-    vertexCount = vertices.size() / 3;
+    vertexCount_ = static_cast<GLsizei>(vertices.size() / 3);
 
-    Renderer::setupMeshBuffers(VAO, VBO, vertices.data(), vertexCount);
-
-
+    Renderer::setupMeshBuffers(vertices.data(), vertexCount_);
 }
 
 Renderer::~Renderer() {
@@ -44,7 +45,7 @@ Renderer::~Renderer() {
     glDeleteProgram(shaderProgram);
 }
 
-void Renderer::clear() const {
+void Renderer::clear() {
     glClear(GL_COLOR_BUFFER_BIT);
 }
 
@@ -69,7 +70,7 @@ GLuint Renderer::createProgram(const char* vertexSource, const char* fragmentSou
     }
 
     //create fragment shader and get reference
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    const GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
 
     //attach fragment shader source to the vertex object
     glShaderSource(fragmentShader, 1, &fragmentSource, nullptr);
@@ -108,7 +109,7 @@ GLuint Renderer::createProgram(const char* vertexSource, const char* fragmentSou
     return shaderProgram;
 }
 
-void Renderer::setupMeshBuffers(GLuint& VAO, GLuint& VBO, const std::vector<float>& vertices, size_t vertexCount) const {
+void Renderer::setupMeshBuffers(const float* vertices, const size_t vertexCount) {
 
     //generate the vao and vbo with 1 object each
     glGenVertexArrays(1, &VAO);
@@ -120,7 +121,7 @@ void Renderer::setupMeshBuffers(GLuint& VAO, GLuint& VBO, const std::vector<floa
     //bind the VBO specifying array_buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //introduce the vertices into the VBO
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), vertices, GL_STATIC_DRAW);
 
     //configure the vertex attribute so OpenGL knows how to read the VBO
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
@@ -132,7 +133,35 @@ void Renderer::setupMeshBuffers(GLuint& VAO, GLuint& VBO, const std::vector<floa
     glBindVertexArray(0);
 }
 
-std::vector<float> Renderer::CreateSphere(float radius, int stacks, int sectors) {
+std::pair<const char*, const char*> Renderer::getShaderSources() {
+    auto vertexSource = R"(
+        #version 330 core
+
+        layout (location = 0) in vec3 aPos;
+
+        uniform mat4 model;
+        uniform mat4 view;
+        uniform mat4 projection;
+
+        void main() {
+            gl_Position = projection * view * model * vec4(aPos, 1.0);
+        }
+    )";
+
+    auto fragmentSource = R"(
+        #version 330 core
+
+        out vec4 FragColor;
+
+        void main() {
+            FragColor = vec4(0.2, 0.6, 1.0, 1.0);
+        }
+    )";
+
+    return {vertexSource, fragmentSource};
+}
+
+std::vector<float> Renderer::createSphere(float radius, int stacks, int sectors) {
     std::vector<float> vertices;
 
     constexpr float PI = std::numbers::pi_v<float>;
@@ -172,30 +201,25 @@ std::vector<float> Renderer::CreateSphere(float radius, int stacks, int sectors)
     return vertices;
 }
 
-std::pair<const char*, const char*> Renderer::getShaderSources() {
-    auto vertexSource = R"(
-        #version 330 core
+void Renderer::drawSphere(const Particle& particle) const {
+    glUseProgram(shaderProgram);
+    glBindVertexArray(VAO);
 
-        layout (location = 0) in vec3 aPos;
+    //create identity matrix
+    glm::mat4 model(1.0f);
 
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
+    //move sphere to particle's position
+    model = glm::translate(model, particle.position);
 
-        void main() {
-            gl_Position = projection * view * model * vec4(aPos, 1.0);
-        }
-    )";
+    //scale sphere to particles radius
+    model = glm::scale(model, glm::vec3(particle.radius));
 
-    auto fragmentSource = R"(
-        #version 330 core
+    //send model to vertex shader
+    glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 
-        out vec4 FragColor;
+    //draw sphere
+    glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
 
-        void main() {
-            FragColor = vec4(0.2, 0.6, 1.0, 1.0);
-        }
-    )";
+    glBindVertexArray(0);
 
-    return {vertexSource, fragmentSource};
 }
