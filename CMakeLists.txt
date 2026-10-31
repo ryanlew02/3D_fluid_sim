@@ -81,6 +81,8 @@ add_executable(3D_fluid_sim
         include/Vec3.h
         src/Renderer.cpp
         include/Renderer.h
+        include/Particle.cpp
+        src/Particle.h
 )
 
 target_include_directories(3D_fluid_sim PRIVATE
