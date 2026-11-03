@@ -1,5 +1,3 @@
-
-
 #include "../include/Renderer.h"
 
 #include <iostream>
@@ -11,8 +9,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-
 Renderer::Renderer() {
+
+    //enable depth in OpenGL
+    glEnable(GL_DEPTH_TEST);
 
     //get shader sources
     auto [vertexSource, fragmentSource] = Renderer::getShaderSources();
@@ -46,9 +46,8 @@ Renderer::~Renderer() {
 }
 
 void Renderer::clear() {
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
-
 
 GLuint Renderer::createProgram(const char* vertexSource, const char* fragmentSource) {
 
@@ -161,7 +160,7 @@ std::pair<const char*, const char*> Renderer::getShaderSources() {
     return {vertexSource, fragmentSource};
 }
 
-std::vector<float> Renderer::createSphere(float radius, int stacks, int sectors) {
+std::vector<float> Renderer::createSphere(const float radius, const int stacks, const int sectors) {
     std::vector<float> vertices;
 
     constexpr float PI = std::numbers::pi_v<float>;
@@ -176,8 +175,8 @@ std::vector<float> Renderer::createSphere(float radius, int stacks, int sectors)
 
             auto point = [&](const float theta, const float phi) {
                 const float x = radius * sin(theta) * cos(phi);
-                const float y = radius * sin(theta) * sin(phi);
-                const float z = radius * cos(theta);
+                const float y = radius * cos(theta);
+                const float z = radius * sin(theta) * sin(phi);
 
                 return std::vector<float>{x, y, z};
             };
@@ -221,5 +220,16 @@ void Renderer::drawSphere(const Particle& particle) const {
     glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
 
     glBindVertexArray(0);
+
+}
+
+void Renderer::setCamera(const Camera& camera, const float aspectRatio) const{
+    glUseProgram(shaderProgram);
+
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 projection = camera.getProjectionMatrix(aspectRatio);
+
+    glUniformMatrix4fv(viewLocation, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
 }

@@ -2,6 +2,7 @@
 #include <utility>
 #include <vector>
 
+#include "Camera.h"
 #include "glad/gl.h"
 
 class Renderer {
@@ -15,8 +16,9 @@ public:
     Renderer& operator=(const Renderer&) = delete;
 
     void drawSphere(const Particle& particle) const;
-    static std::vector<float> createSphere(const float radius = 1.0f, const int stacks = 20, const int sectors = 30);
-    void setupMeshBuffers(const float* vertices, const size_t vertexCount);
+    static std::vector<float> createSphere(float radius = 1.0f, int stacks = 20, int sectors = 30);
+    void setupMeshBuffers(const float* vertices, size_t vertexCount);
+    void setCamera(const Camera& camera, float aspectRatio) const;
 
 
     static void clear();

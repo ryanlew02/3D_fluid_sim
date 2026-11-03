@@ -83,6 +83,8 @@ add_executable(3D_fluid_sim
         include/Renderer.h
         include/Particle.cpp
         src/Particle.h
+        src/Camera.cpp
+        include/Camera.h
 )
 
 target_include_directories(3D_fluid_sim PRIVATE
