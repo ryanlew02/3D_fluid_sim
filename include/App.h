@@ -2,20 +2,23 @@
 // Created by ryanl on 10/20/2026.
 //
 #pragma once
+#include "Camera.h"
+#include "Renderer.h"
 #include "Window.h"
 
 
 class App {
-private:
-    Window window;
-    //Renderer renderer;
-
-    void update();
-    void render();
 
 public:
 
     App();
     void run();
+
+private:
+    Window window;
+    Renderer renderer;
+    Camera camera;
+
+    Particle particle;
 };
 

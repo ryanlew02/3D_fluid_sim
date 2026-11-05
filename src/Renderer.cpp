@@ -9,6 +9,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include "Particle.h"
+
 Renderer::Renderer() {
 
     //enable depth in OpenGL
@@ -178,7 +180,7 @@ std::vector<float> Renderer::createSphere(const float radius, const int stacks, 
                 const float y = radius * cos(theta);
                 const float z = radius * sin(theta) * sin(phi);
 
-                return std::vector<float>{x, y, z};
+                return std::vector{x, y, z};
             };
 
             auto a = point(theta1, phi1);

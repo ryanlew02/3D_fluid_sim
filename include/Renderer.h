@@ -4,6 +4,7 @@
 
 #include "Camera.h"
 #include "glad/gl.h"
+#include "Particle.h"
 
 class Renderer {
 

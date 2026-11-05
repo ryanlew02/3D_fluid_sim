@@ -78,11 +78,10 @@ add_executable(3D_fluid_sim
         src/App.cpp
         include/Window.h
         include/App.h
-        include/Vec3.h
         src/Renderer.cpp
         include/Renderer.h
-        include/Particle.cpp
-        src/Particle.h
+        src/Particle.cpp
+        include/Particle.h
         src/Camera.cpp
         include/Camera.h
 )
