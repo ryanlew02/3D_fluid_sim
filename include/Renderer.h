@@ -20,6 +20,7 @@ public:
     static std::vector<float> createSphere(float radius = 1.0f, int stacks = 20, int sectors = 30);
     void setupMeshBuffers(const float* vertices, size_t vertexCount);
     void setCamera(const Camera& camera, float aspectRatio) const;
+    void createBox();
 
 
     static void clear();

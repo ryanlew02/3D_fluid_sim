@@ -39,6 +39,8 @@ Renderer::Renderer() {
     vertexCount_ = static_cast<GLsizei>(vertices.size() / 3);
 
     Renderer::setupMeshBuffers(vertices.data(), vertexCount_);
+
+    createBox();
 }
 
 Renderer::~Renderer() {
@@ -235,3 +237,9 @@ void Renderer::setCamera(const Camera& camera, const float aspectRatio) const{
     glUniformMatrix4fv(projectionLocation, 1, GL_FALSE, glm::value_ptr(projection));
 
 }
+
+void Renderer::createBox() {
+}
+
+
+

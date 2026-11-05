@@ -3,8 +3,6 @@
 //
 #include "../include/App.h"
 
-#include "glm/gtx/io.hpp"
-
 
 App::App() : window(800, 800, "Fluid Simulator"), particle(glm::vec3(0.0f, 0.0f, 0.0f), 1.0f, 0.5f) {
 
