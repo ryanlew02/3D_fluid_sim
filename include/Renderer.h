@@ -6,6 +6,8 @@
 #include "glad/gl.h"
 #include "Particle.h"
 
+struct MeshData;
+
 class Renderer {
 
 public:
@@ -17,8 +19,8 @@ public:
     Renderer& operator=(const Renderer&) = delete;
 
     void drawSphere(const Particle& particle) const;
-    static std::vector<float> createSphere(float radius = 1.0f, int stacks = 20, int sectors = 30);
-    void setupMeshBuffers(const float* vertices, size_t vertexCount);
+    static MeshData createSphere(float radius = 1.0f, int stacks = 20, int sectors = 30);
+    void setupMeshBuffers(const MeshData& meshData);
     void setCamera(const Camera& camera, float aspectRatio) const;
     void createBox();
 
@@ -28,9 +30,10 @@ public:
 
 private:
 
-    GLuint VAO = 0, VBO = 0;
+    GLuint VAO = 0, VBO = 0, EBO = 0;
     GLuint shaderProgram = 0;
     GLsizei vertexCount_ = 0;
+    GLsizei indexCount_ = 0;
 
     GLint modelLocation = -1;
     GLint viewLocation = -1;
@@ -42,3 +45,10 @@ private:
 
 };
 
+
+struct MeshData {
+
+    std::vector<float> vertices;
+    std::vector<unsigned int> indices;
+
+};

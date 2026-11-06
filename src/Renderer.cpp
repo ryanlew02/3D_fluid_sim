@@ -34,11 +34,11 @@ Renderer::Renderer() {
     //tell OpenGL which shader program we want to use
     glUseProgram(shaderProgram);
 
-    const std::vector<float> vertices = createSphere();
+    const MeshData sphere = createSphere();
 
-    vertexCount_ = static_cast<GLsizei>(vertices.size() / 3);
+    indexCount_ = static_cast<GLsizei>(sphere.indices.size());
 
-    Renderer::setupMeshBuffers(vertices.data(), vertexCount_);
+    setupMeshBuffers(sphere);
 
     createBox();
 }
@@ -46,6 +46,7 @@ Renderer::Renderer() {
 Renderer::~Renderer() {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
     glDeleteProgram(shaderProgram);
 }
 
@@ -112,11 +113,12 @@ GLuint Renderer::createProgram(const char* vertexSource, const char* fragmentSou
     return shaderProgram;
 }
 
-void Renderer::setupMeshBuffers(const float* vertices, const size_t vertexCount) {
+void Renderer::setupMeshBuffers(const MeshData& mesh) {
 
     //generate the vao and vbo with 1 object each
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
+    glGenBuffers(1, &EBO);
 
     //make the VAO the current vertex array by binding it
     glBindVertexArray(VAO);
@@ -124,7 +126,11 @@ void Renderer::setupMeshBuffers(const float* vertices, const size_t vertexCount)
     //bind the VBO specifying array_buffer
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     //introduce the vertices into the VBO
-    glBufferData(GL_ARRAY_BUFFER, vertexCount * 3 * sizeof(float), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, mesh.vertices.size() * sizeof(float), mesh.vertices.data(), GL_STATIC_DRAW);
+
+    //upload triangle vertices
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, mesh.indices.size() * sizeof(unsigned int), mesh.indices.data(), GL_STATIC_DRAW);
 
     //configure the vertex attribute so OpenGL knows how to read the VBO
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), static_cast<void*>(nullptr));
@@ -164,44 +170,54 @@ std::pair<const char*, const char*> Renderer::getShaderSources() {
     return {vertexSource, fragmentSource};
 }
 
-std::vector<float> Renderer::createSphere(const float radius, const int stacks, const int sectors) {
+MeshData Renderer::createSphere(const float radius, const int stacks, const int sectors) {
+
+    MeshData mesh;
+
     std::vector<float> vertices;
 
     constexpr float PI = std::numbers::pi_v<float>;
 
-    for (int i = 0; i < stacks; i++) {
-        const float theta1 = PI * i / stacks;
-        const float theta2 = PI * (i + 1) / stacks;
+    //go through the stacks and sectors and get the points for each square to create the triangles
+    for (int i = 0; i <= stacks; i++) {
+        const float theta = i * PI / stacks;
 
-        for (int j = 0; j < sectors; j++) {
-            const float phi1 = 2.0f * PI * j / sectors;
-            const float phi2 = 2.0f * PI * (j + 1) / sectors;
+        for (int j = 0; j <= sectors; j++) {
+            const float phi = 2.0f * PI * j / sectors;
 
-            auto point = [&](const float theta, const float phi) {
-                const float x = radius * sin(theta) * cos(phi);
-                const float y = radius * cos(theta);
-                const float z = radius * sin(theta) * sin(phi);
+            const float x = radius * sin(theta) * cos(phi);
+            const float y = radius * cos(theta);
+            const float z = radius * sin(theta) * sin(phi);
 
-                return std::vector{x, y, z};
-            };
+            mesh.vertices.push_back(x);
+            mesh.vertices.push_back(y);
+            mesh.vertices.push_back(z);
 
-            auto a = point(theta1, phi1);
-            auto b = point(theta2, phi1);
-            auto c = point(theta2, phi2);
-            auto d = point(theta1, phi2);
-
-            //first triangle
-            vertices.insert(vertices.end(), a.begin(), a.end());
-            vertices.insert(vertices.end(), b.begin(), b.end());
-            vertices.insert(vertices.end(), c.begin(), c.end());
-
-            //second triangle
-            vertices.insert(vertices.end(), a.begin(), a.end());
-            vertices.insert(vertices.end(), c.begin(), c.end());
-            vertices.insert(vertices.end(), d.begin(), d.end());
         }
     }
-    return vertices;
+
+    for (int i = 0; i < stacks; i++) {
+        for (int j = 0; j < sectors; j++) {
+            const unsigned int a = i * (sectors + 1) + j;
+            const unsigned int b = (i + 1) * (sectors + 1) + j;
+            const unsigned int c = b + 1;
+            const unsigned int d = a + 1;
+
+            //first triangle
+            mesh.indices.push_back(a);
+            mesh.indices.push_back(b);
+            mesh.indices.push_back(c);
+
+            //second triangle
+            mesh.indices.push_back(a);
+            mesh.indices.push_back(c);
+            mesh.indices.push_back(d);
+
+        }
+    }
+
+
+    return mesh;
 }
 
 void Renderer::drawSphere(const Particle& particle) const {
@@ -220,8 +236,8 @@ void Renderer::drawSphere(const Particle& particle) const {
     //send model to vertex shader
     glUniformMatrix4fv(modelLocation, 1, GL_FALSE, glm::value_ptr(model));
 
-    //draw sphere
-    glDrawArrays(GL_TRIANGLES, 0, vertexCount_);
+    //draw spheres
+    glDrawElements(GL_TRIANGLES, indexCount_, GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(0);
 
@@ -239,6 +255,11 @@ void Renderer::setCamera(const Camera& camera, const float aspectRatio) const{
 }
 
 void Renderer::createBox() {
+
+
+
+
+
 }
 
 
